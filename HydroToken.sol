@@ -41,11 +41,11 @@ contract owned {
 }
 
 contract basicToken {
-    function balanceOf(address) public view returns (uint256) {}
-    function transfer(address, uint256) public returns (bool) {}
-    function transferFrom(address, address, uint256) public returns (bool) {}
-    function approve(address, uint256) public returns (bool) {}
-    function allowance(address, address) public view returns (uint256) {}
+    function balanceOf(address) public view returns (uint256);
+    function transfer(address, uint256) public returns (bool);
+    function transferFrom(address, address, uint256) public returns (bool);
+    function approve(address, uint256) public returns (bool);
+    function allowance(address, address) public view returns (uint256);
 
     event Transfer(address indexed _from, address indexed _to, uint256 _value);
     event Approval(address indexed _owner, address indexed _spender, uint256 _value);
@@ -61,7 +61,7 @@ contract ERC20Standard is basicToken{
         require (_to != 0x0);                               // Prevent transfer to 0x0 address
         require (balances[msg.sender] > _value);            // Check if the sender has enough
         require (balances[_to] + _value > balances[_to]);   // Check for overflows
-        _transfer(msg.sender, _to, _value);                 // Perform actually transfer
+        _transfer(msg.sender, _to, _value);                 // Perform actual transfer
         Transfer(msg.sender, _to, _value);                  // Trigger Transfer event
         return true;
     }
@@ -72,7 +72,7 @@ contract ERC20Standard is basicToken{
         require (balances[msg.sender] > _value);            // Check if the sender has enough
         require (balances[_to] + _value > balances[_to]);   // Check for overflows
         require (allowed[_from][msg.sender] >= _value);     // Only allow if sender is allowed to do this
-        _transfer(msg.sender, _to, _value);                 // Perform actually transfer
+        _transfer(msg.sender, _to, _value);                 // Perform actual transfer
         Transfer(msg.sender, _to, _value);                  // Trigger Transfer event
         return true;
     }
@@ -111,7 +111,7 @@ contract HydroToken is ERC20Standard, owned{
         uint challenge;
     }
 
-    struct hydrogenValues {
+    struct hydroValues {
         uint value;
         uint timestamp;
     }
@@ -126,7 +126,7 @@ contract HydroToken is ERC20Standard, owned{
      */
     mapping (uint => mapping (address => bool)) public whitelist;
     mapping (uint => mapping (address => partnerValues)) public partnerMap;
-    mapping (uint => mapping (address => hydrogenValues)) public hydroPartnerMap;
+    mapping (uint => mapping (address => hydroValues)) public hydroPartnerMap;
 
     /* Initializes contract with initial supply tokens to the creator of the contract */
     function HydroToken(address _ownerAddress) public {
@@ -172,13 +172,13 @@ contract HydroToken is ERC20Standard, owned{
         partnerMap[_partnerId][_sender].challenge = _challenge;
     }
 
-    /* Function to update the hydrogenValuesMap. Called exclusively from the Hedgeable API */
+    /* Function to update the hydroValuesMap. Called exclusively from the Hydro API */
     function updateHydroMap(address _sender, uint _value, uint _partnerId) public onlyOwner {
         hydroPartnerMap[_partnerId][_sender].value = _value;
         hydroPartnerMap[_partnerId][_sender].timestamp = block.timestamp + 1 days;
     }
 
-    /* Function called by Hydrogen API to check if the partner has validated
+    /* Function called by Hydro API to check if the partner has validated
      * The partners value and data must match and it must be less than a day since the last authentication
      */
     function validateAuthentication(address _sender, uint _challenge, uint _partnerId) public constant returns (bool _isValid) {
